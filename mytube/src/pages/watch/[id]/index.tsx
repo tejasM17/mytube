@@ -1,14 +1,11 @@
 
 import Videopplayer from "@/components/Videopplayer";
-import { notFound } from "next/navigation";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 
 const index = () => {
     const router = useRouter();
     const { id } = router.query;
-    const [videos, setvideo] = useState<any>(null);
-    const [loading, setloading] = useState(true);
 
     const relatedVideos = [
         {
@@ -46,11 +43,8 @@ const index = () => {
         return relatedVideos.find((video) => video._id === stringid);
     }, [id])
 
-    if (loading) {
-        return <div>Loading..</div>;
-    }
 
-    if (!videos) {
+    if (!video) {
         return <div>Video not found</div>;
     }
     return (
@@ -58,7 +52,7 @@ const index = () => {
             <div className="max-w-7xl mx-auto p-4">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-4">
-                        <Videopplayer video={videos} />
+                        <Videopplayer video={video} />
                     </div>
                 </div>
             </div>

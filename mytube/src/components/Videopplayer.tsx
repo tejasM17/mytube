@@ -1,14 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
-interface VideoPlayerProps {
-    video: {
-        _id: string;
-        videotitle: string;
-        filepath: string;
-    };
-}
-
-export default function VideoPlayer({ video }: VideoPlayerProps) {
+export default function VideoPlayer({ video }: any) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const videos = "/video/vdo.mp4";
 
