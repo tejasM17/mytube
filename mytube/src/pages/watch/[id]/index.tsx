@@ -1,4 +1,7 @@
 
+import Comments from "@/components/Comments";
+import RelatedVideos from "@/components/RelatedVideos";
+import VideoInfo from "@/components/VideoInfo";
 import Videopplayer from "@/components/Videopplayer";
 import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -53,6 +56,11 @@ const index = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-4">
                         <Videopplayer video={video} />
+                        <VideoInfo video={video} />
+                        <Comments videoId={id} />
+                    </div>
+                    <div className="space-y-4">
+                        <RelatedVideos videos={relatedVideos} />
                     </div>
                 </div>
             </div>

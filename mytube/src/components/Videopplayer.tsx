@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function VideoPlayer({ video }: any) {
     const videoRef = useRef<HTMLVideoElement>(null);
