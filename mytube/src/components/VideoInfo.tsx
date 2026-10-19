@@ -21,8 +21,8 @@ const VideoInfo = ({ video }: any) => {
     const [isWatchLater, setIsWatchLater] = useState(false);
     const user = {
         _id: "1",
-        name: "John Doe",
-        email: "john@example.com",
+        name: "Tejas M",
+        email: "tej@example.com",
         image: "https://github.com/shadcn.png?height=32&width=32",
     };
 
