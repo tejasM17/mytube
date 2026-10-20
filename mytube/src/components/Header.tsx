@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import Channeldialogue from "./channeldialogue";
+import { useRouter } from "next/router";
 
 const Header = () => {
     const user = {
@@ -17,6 +18,18 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [hasChannel, setHasChannel] = useState(false);
     const [isdialogeopen, setisdialogeopen] = useState(false);
+    const router = useRouter();
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+    const handleKeypress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleSearch(e as any);
+        }
+    };
     return (
         <header className="sticky top-0 z-20 flex h-[52px] items-center justify-between border-b border-gray-200 bg-white px-4">
             <div className="flex w-[238px] shrink-0 items-center gap-3">
@@ -35,12 +48,14 @@ const Header = () => {
             </div>
 
             <form
+                onSubmit={handleSearch}
                 className="mx-6 flex w-full max-w-[630px] flex-1 items-center gap-3"
             >
                 <div className="flex flex-1">
                     <Input
                         type="search"
                         placeholder="Search"
+                        onKeyPress={handleKeypress}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-9 rounded-l-full border-gray-300 px-4 text-sm focus-visible:ring-0"
