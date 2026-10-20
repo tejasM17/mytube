@@ -5,11 +5,11 @@ import {
     Clock,
     ThumbsUp,
     History,
-    User,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
+import Channeldialogue from "./channeldialogue";
 
 const Sidebar = () => {
     const user = {
@@ -17,6 +17,8 @@ const Sidebar = () => {
         name: "John Doe",
         email: "john@example.com",
     };
+    const [hasChannel, setHasChannel] = useState(false);
+    const [isdialogeopen, setisdialogeopen] = useState(false);
     return (
         <aside className="w-[254px] shrink-0 border-r border-gray-200 bg-white px-2 pt-2 max-md:w-[72px] max-md:px-1">
             <nav className="space-y-1">
@@ -60,17 +62,23 @@ const Sidebar = () => {
                                     Watch later
                                 </Button>
                             </Link>
-                            <Link href={`/channel/${user.id}`}>
-                                <Button variant="ghost" className="h-9 w-full justify-start rounded-lg px-2.5 text-sm font-normal">
-                                    <User className="mr-2.5 h-[18px] w-[18px]" />
-                                    Your channel
-                                </Button>
-                            </Link>
+                            <Button
+                                variant="ghost"
+                                className="h-9 w-full justify-start rounded-lg px-2.5 text-sm font-normal"
+                                onClick={() => setisdialogeopen(true)}
+                            >
+                                Create channel
+                            </Button>
+
                         </div>
                     </>
                 )}
             </nav>
-
+            <Channeldialogue
+                isopen={isdialogeopen}
+                onclose={() => setisdialogeopen(false)}
+                mode="create"
+            />
         </aside>
     )
 }
