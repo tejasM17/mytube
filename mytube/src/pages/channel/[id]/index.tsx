@@ -17,7 +17,12 @@ const index = () => {
         image: "https://github.com/shadcn.png?height=32&width=32",
     };
     try {
-        let channel = user;
+        let channel = {
+            ...user,
+            name: "Tech Channel",
+            description: "Welcome to our tech channel! We cover the latest in technology, reviews, and tutorials.",
+            channelname: "techchannel",
+        };
 
         const videos = [
             {
