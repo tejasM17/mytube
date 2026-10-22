@@ -1,8 +1,8 @@
-
 import ChannelHeader from "@/components/ChannelHeader";
 import Channeltabs from "@/components/Channeltabs";
 import ChannelVideos from "@/components/ChannelVideos";
 import VideoUploader from "@/components/VideoUploader";
+import { useUser } from "@/lib/AuthContext";
 import { notFound } from "next/navigation";
 import { useRouter } from "next/router";
 import React from "react";
@@ -10,19 +10,15 @@ import React from "react";
 const index = () => {
     const router = useRouter();
     const { id } = router.query;
-    const user: any = {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
+    const { user } = useUser();
+    // const user: any = {
+    //   id: "1",
+    //   name: "John Doe",
+    //   email: "john@example.com",
+    //   image: "https://github.com/shadcn.png?height=32&width=32",
+    // };
     try {
-        let channel = {
-            ...user,
-            name: "Tech Channel",
-            description: "Welcome to our tech channel! We cover the latest in technology, reviews, and tutorials.",
-            channelname: "techchannel",
-        };
+        let channel = user;
 
         const videos = [
             {

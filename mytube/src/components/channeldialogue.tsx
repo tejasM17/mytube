@@ -11,17 +11,11 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-// import axiosInstance from "@/lib/axiosinstance";
-// import { useUser } from "@/lib/AuthContext";
+import axiosInstance from "@/lib/axiosinstance";
+import { useUser } from "@/lib/AuthContext";
 
 const Channeldialogue = ({ isopen, onclose, channeldata, mode }: any) => {
-    // const { user, login } = useUser();
-    const user: any = {
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
+    const { user, login } = useUser();
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -49,21 +43,21 @@ const Channeldialogue = ({ isopen, onclose, channeldata, mode }: any) => {
     };
     const handlesubmit = async (e: FormEvent) => {
         e.preventDefault();
-        // const payload = {
-        //     channelname: formData.name,
-        //     description: formData.description,
-        // };
-        // const response = await axiosInstance.patch(
-        //     `/user/update/${user._id}`,
-        //     payload
-        // );
-        // login(response?.data);
-        // router.push(`/channel/${user?._id}`);
-        // setFormData({
-        //     name: "",
-        //     description: "",
-        // });
-        // onclose();
+        const payload = {
+            channelname: formData.name,
+            description: formData.description,
+        };
+        const response = await axiosInstance.patch(
+            `/user/update/${user._id}`,
+            payload
+        );
+        login(response?.data);
+        router.push(`/channel/${user?._id}`);
+        setFormData({
+            name: "",
+            description: "",
+        });
+        onclose();
     };
     return (
         <Dialog open={isopen} onOpenChange={onclose}>
