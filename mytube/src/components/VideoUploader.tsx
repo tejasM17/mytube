@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Progress } from "./ui/progress";
+import axiosInstance from "@/lib/axiosinstance";
 
 const VideoUploader = ({ channelId, channelName }: any) => {
     const [isUploading, setIsUploading] = useState(false);
@@ -17,8 +18,8 @@ const VideoUploader = ({ channelId, channelName }: any) => {
         const files = e.target.files;
         if (files && files.length > 0) {
             const file = files[0];
-            if (!file.type.startsWith("video/")) {
-                toast.error("Please upload a valid video file.");
+            if (!/\.(mp4|webm|mov)$/i.test(file.name)) {
+                toast.error("Please upload an MP4, WebM, or MOV video file.");
                 return;
             }
             if (file.size > 100 * 1024 * 1024) {
@@ -47,7 +48,36 @@ const VideoUploader = ({ channelId, channelName }: any) => {
             toast.error("Your video upload has been cancelled");
         }
     };
-
+    const handleUpload = async () => {
+        if (!videoFile || !videoTitle.trim()) {
+            toast.error("Please provide file and title");
+            return;
+        }
+        const formdata = new FormData();
+        formdata.append("file", videoFile);
+        formdata.append("videotitle", videoTitle);
+        formdata.append("videochanel", channelName);
+        formdata.append("uploader", channelId);
+        try {
+            setIsUploading(true);
+            setUploadProgress(0);
+            const res = await axiosInstance.post("/video/upload", formdata, {
+                onUploadProgress: (progresEvent: any) => {
+                    const progress = Math.round(
+                        (progresEvent.loaded * 100) / progresEvent.total
+                    );
+                    setUploadProgress(progress);
+                },
+            });
+            toast.success("Upload successfully");
+            resetForm();
+        } catch (error) {
+            console.error("Error uploading video:", error);
+            toast.error("There was an error uploading your video. Please try again.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
     return (
         <div className="bg-gray-50 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Upload a video</h2>
@@ -66,13 +96,13 @@ const VideoUploader = ({ channelId, channelName }: any) => {
                             or click to select files
                         </p>
                         <p className="text-xs text-gray-400 mt-4">
-                            MP4, WebM, MOV or AVI • Up to 100MB
+                            MP4, WebM, or MOV • Up to 100MB
                         </p>
                         <input
                             type="file"
                             ref={fileInputRef}
                             className="hidden"
-                            accept="video/*"
+                            accept=".mp4,.webm,.mov,video/mp4,video/webm,video/quicktime"
                             onChange={handlefilechange}
                         />
                     </div>
@@ -131,6 +161,7 @@ const VideoUploader = ({ channelId, channelName }: any) => {
                                         Cancel
                                     </Button>
                                     <Button
+                                        onClick={handleUpload}
                                         disabled={
                                             isUploading || !videoTitle.trim() || uploadComplete
                                         }
