@@ -11,12 +11,6 @@ const index = () => {
     const router = useRouter();
     const { id } = router.query;
     const { user } = useUser();
-    // const user: any = {
-    //   id: "1",
-    //   name: "John Doe",
-    //   email: "john@example.com",
-    //   image: "https://github.com/shadcn.png?height=32&width=32",
-    // };
     try {
         let channel = user;
 
