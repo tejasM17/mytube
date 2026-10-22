@@ -2,15 +2,21 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { UserProvider } from "../lib/AuthContext";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <div className="min-h-screen bg-white text-black">
-      <Header />
-      <div className="flex min-h-[calc(100vh-52px)]">
-        <Sidebar />
-        <Component {...pageProps} />
+    <UserProvider>
+      <div className="min-h-screen bg-white text-black">
+        <title>Your-Tube Clone</title>
+        <Header />
+        <Toaster />
+        <div className="flex">
+          <Sidebar />
+          <Component {...pageProps} />
+        </div>
       </div>
-    </div>
+    </UserProvider>
   );
 }
