@@ -4,7 +4,7 @@ export const uploadvideo = async (req, res) => {
     if (req.file === undefined) {
         return res
             .status(404)
-            .json({ message: "Please upload an MP4, WebM, or MOV video file." });
+            .json({ message: "plz upload a mp4 video file only" });
     } else {
         try {
             const file = new video({
@@ -20,7 +20,7 @@ export const uploadvideo = async (req, res) => {
             return res.status(201).json("file uploaded successfully");
         } catch (error) {
             console.error(" error:", error);
-            return res.status(500).json({ message: "Something went wrong" });
+            return res.status(500).json({ message: "video upload failed" });
         }
     }
 };
@@ -30,6 +30,6 @@ export const getallvideo = async (req, res) => {
         return res.status(200).send(files);
     } catch (error) {
         console.error(" error:", error);
-        return res.status(500).json({ message: "Something went wrong" });
+        return res.status(500).json({ message: "video fetching failed" });
     }
 };

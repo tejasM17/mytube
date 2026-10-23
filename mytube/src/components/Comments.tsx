@@ -3,6 +3,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
+import { useUser } from "@/lib/AuthContext";
+import axiosInstance from "@/lib/axiosinstance";
 interface Comment {
     _id: string;
     videoid: string;
@@ -17,14 +19,8 @@ const Comments = ({ videoId }: any) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
     const [editText, setEditText] = useState("");
-    // const { user } = useUser();
+    const { user } = useUser();
     const [loading, setLoading] = useState(true);
-    const user = {
-        _id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
     const fetchedComments = [
         {
             _id: "1",
@@ -48,26 +44,41 @@ const Comments = ({ videoId }: any) => {
     }, [videoId]);
 
     const loadComments = async () => {
-        setComments(fetchedComments);
+        try {
+            const res = await axiosInstance.get(`/comment/${videoId}`);
+            setComments(res.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
-
+    if (loading) {
+        return <div>Loading history...</div>;
+    }
     const handleSubmitComment = async () => {
         if (!user || !newComment.trim()) return;
 
         setIsSubmitting(true);
         try {
-            const newCommentObj: Comment = {
-                _id: Date.now().toString(),
+            const res = await axiosInstance.post("/comment/postcomment", {
                 videoid: videoId,
                 userid: user._id,
                 commentbody: newComment,
-                usercommented: user.name || "Anonymous",
-                commentedon: new Date().toISOString(),
-            };
-            setComments([newCommentObj, ...comments]);
-
+                usercommented: user.name,
+            });
+            if (res.data.comment) {
+                const newCommentObj: Comment = {
+                    _id: Date.now().toString(),
+                    videoid: videoId,
+                    userid: user._id,
+                    commentbody: newComment,
+                    usercommented: user.name || "Anonymous",
+                    commentedon: new Date().toISOString(),
+                };
+                setComments([newCommentObj, ...comments]);
+            }
             setNewComment("");
-
         } catch (error) {
             console.error("Error adding comment:", error);
         } finally {
@@ -82,18 +93,34 @@ const Comments = ({ videoId }: any) => {
 
     const handleUpdateComment = async () => {
         if (!editText.trim()) return;
-        setComments((prev) =>
-            prev.map((c) =>
-                c._id === editingCommentId ? { ...c, commentbody: editText } : c
-            )
-        );
-        setEditingCommentId(null);
-        setEditText("");
+        try {
+            const res = await axiosInstance.post(
+                `/comment/editcomment/${editingCommentId}`,
+                { commentbody: editText }
+            );
+            if (res.data) {
+                setComments((prev) =>
+                    prev.map((c) =>
+                        c._id === editingCommentId ? { ...c, commentbody: editText } : c
+                    )
+                );
+                setEditingCommentId(null);
+                setEditText("");
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const handleDelete = async (id: string) => {
-        setComments((prev) => prev.filter((c) => c._id !== id));
-
+        try {
+            const res = await axiosInstance.delete(`/comment/deletecomment/${id}`);
+            if (res.data.comment) {
+                setComments((prev) => prev.filter((c) => c._id !== id));
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
     return (
         <div className="space-y-6">
