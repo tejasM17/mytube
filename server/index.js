@@ -8,6 +8,7 @@ import videoroutes from "./routes/video.js";
 import likeroutes from "./routes/like.js";
 import watchlaterroutes from "./routes/watchlater.js";
 import historyrroutes from "./routes/history.js";
+import commentroutes from "./routes/comment.js";
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 app.use(bodyParser.json());
 app.use("/user", userroutes);
 app.use("/video", videoroutes);
+app.use("/comment", commentroutes);
 app.use("/like", likeroutes);
 app.use("/watch", watchlaterroutes);
 app.use("/history", historyrroutes);
