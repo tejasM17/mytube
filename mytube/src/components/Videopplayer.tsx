@@ -1,6 +1,16 @@
-import { useRef } from "react";
+"use client";
 
-export default function VideoPlayer({ video }: any) {
+import { useRef, useEffect } from "react";
+
+interface VideoPlayerProps {
+    video: {
+        _id: string;
+        videotitle: string;
+        filepath: string;
+    };
+}
+
+export default function VideoPlayer({ video }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const videos = "/video/vdo.mp4";
 
@@ -10,9 +20,10 @@ export default function VideoPlayer({ video }: any) {
                 ref={videoRef}
                 className="w-full h-full"
                 controls
+                poster={`/placeholder.svg?height=480&width=854`}
             >
                 <source
-                    src={videos}
+                    src={`${process.env.BACKEND_URL}/${video?.filepath}`}
                     type="video/mp4"
                 />
                 Your browser does not support the video tag.

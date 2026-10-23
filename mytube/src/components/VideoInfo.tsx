@@ -10,21 +10,17 @@ import {
     ThumbsUp,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useUser } from "@/lib/AuthContext";
+import axiosInstance from "@/lib/axiosinstance";
 
 const VideoInfo = ({ video }: any) => {
     const [likes, setlikes] = useState(video.Like || 0);
     const [dislikes, setDislikes] = useState(video.Dislike || 0);
     const [isLiked, setIsLiked] = useState(false);
     const [isDisliked, setIsDisliked] = useState(false);
-
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const { user } = useUser();
     const [isWatchLater, setIsWatchLater] = useState(false);
-    const user = {
-        _id: "1",
-        name: "Tejas M",
-        email: "tej@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
 
     useEffect(() => {
         setlikes(video.Like || 0);
@@ -33,44 +29,82 @@ const VideoInfo = ({ video }: any) => {
         setIsDisliked(false);
     }, [video]);
 
+    useEffect(() => {
+        const handleviews = async () => {
+            if (user) {
+                try {
+                    return await axiosInstance.post(`/history/${video._id}`, {
+                        userId: user?._id,
+                    });
+                } catch (error) {
+                    return console.log(error);
+                }
+            } else {
+                return await axiosInstance.post(`/history/views/${video?._id}`);
+            }
+        };
+        handleviews();
+    }, [user]);
     const handleLike = async () => {
         if (!user) return;
-        if (isLiked) {
-            setlikes((prev: any) => prev - 1);
-            setIsLiked(false);
-        } else {
-            setlikes((prev: any) => prev + 1);
-            setIsLiked(true);
-            if (isDisliked) {
-                setDislikes((prev: any) => prev - 1);
-                setIsDisliked(false);
-            }
-        }
-    };
-
-    const handleDislike = async () => {
-        if (!user) return;
-
-        if (isDisliked) {
-            if (isDisliked) {
-                setDislikes((prev: any) => prev - 1);
-                setIsDisliked(false);
-            } else {
-                setDislikes((prev: any) => prev + 1);
-                setIsDisliked(true);
+        try {
+            const res = await axiosInstance.post(`/like/${video._id}`, {
+                userId: user?._id,
+            });
+            if (res.data.liked) {
                 if (isLiked) {
                     setlikes((prev: any) => prev - 1);
                     setIsLiked(false);
+                } else {
+                    setlikes((prev: any) => prev + 1);
+                    setIsLiked(true);
+                    if (isDisliked) {
+                        setDislikes((prev: any) => prev - 1);
+                        setIsDisliked(false);
+                    }
                 }
             }
+        } catch (error) {
+            console.log(error);
         }
-
     };
-
-
-
-
-
+    const handleWatchLater = async () => {
+        try {
+            const res = await axiosInstance.post(`/watch/${video._id}`, {
+                userId: user?._id,
+            });
+            if (res.data.watchlater) {
+                setIsWatchLater(!isWatchLater);
+            } else {
+                setIsWatchLater(false);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    const handleDislike = async () => {
+        if (!user) return;
+        try {
+            const res = await axiosInstance.post(`/like/${video._id}`, {
+                userId: user?._id,
+            });
+            if (!res.data.liked) {
+                if (isDisliked) {
+                    setDislikes((prev: any) => prev - 1);
+                    setIsDisliked(false);
+                } else {
+                    setDislikes((prev: any) => prev + 1);
+                    setIsDisliked(true);
+                    if (isLiked) {
+                        setlikes((prev: any) => prev - 1);
+                        setIsLiked(false);
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <div className="space-y-4">
             <h1 className="text-xl font-semibold">{video.videotitle}</h1>
@@ -114,7 +148,16 @@ const VideoInfo = ({ video }: any) => {
                             {dislikes.toLocaleString()}
                         </Button>
                     </div>
-
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`bg-gray-100 rounded-full ${isWatchLater ? "text-primary" : ""
+                            }`}
+                        onClick={handleWatchLater}
+                    >
+                        <Clock className="w-5 h-5 mr-2" />
+                        {isWatchLater ? "Saved" : "Watch Later"}
+                    </Button>
                     <Button
                         variant="ghost"
                         size="sm"
@@ -161,7 +204,7 @@ const VideoInfo = ({ video }: any) => {
                 </Button>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default VideoInfo
+export default VideoInfo;
