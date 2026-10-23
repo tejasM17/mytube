@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,79 +12,38 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface HistoryItem {
-    _id: string;
-    videoid: string;
-    viewer: string;
-    watchdone: string;
-    video: {
-        _id: string;
-        videotitle: string;
-        videochanel: string;
-        views: number;
-        createdAt: string;
-    };
-
-}
+import axiosInstance from "@/lib/axiosinstance";
+import { mediaUrl } from "@/lib/mediaUrl";
+import { useUser } from "@/lib/AuthContext";
 
 export default function HistoryContent() {
-    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    //   const { user } = useUser();
-    const user = {
-        _id: "1",
-        name: "Tejas M",
-        email: "tej@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
+    const { user } = useUser();
+
     useEffect(() => {
         if (user) {
             loadHistory();
         } else {
             setLoading(true);
         }
-    }, []);
+    }, [user]);
 
     const loadHistory = async () => {
         if (!user) return;
 
         try {
-            const historyData: HistoryItem[] = [
-                {
-                    _id: "h1",
-                    videoid: "1",
-                    viewer: user._id,
-                    watchdone: new Date(Date.now() - 3600 * 1000).toISOString(),
-                    video: {
-                        _id: "1",
-                        videotitle: "NewYork City Tour",
-                        videochanel: "Travel Vlogs",
-                        views: 1000,
-                        createdAt: new Date().toISOString(),
-                    }
-                },
-                {
-                    _id: "h2",
-                    videoid: "2",
-                    viewer: user._id,
-                    watchdone: new Date(Date.now() - 3600 * 1000).toISOString(),
-                    video: {
-                        _id: "1",
-                        videotitle: "NewYork City Tour",
-                        videochanel: "Travel Vlogs",
-                        views: 1000,
-                        createdAt: new Date().toISOString(),
-                    },
-                }
-            ];
-            setHistory(historyData);
+            const historyData = await axiosInstance.get(`/history/${user?._id}`);
+            setHistory(historyData.data);
         } catch (error) {
             console.error("Error loading history:", error);
         } finally {
             setLoading(false);
         }
     };
+    if (loading) {
+        return <div>Loading history...</div>;
+    }
 
     const handleRemoveFromHistory = async (historyId: string) => {
         try {
@@ -127,33 +88,30 @@ export default function HistoryContent() {
             <div className="space-y-4">
                 {history.map((item) => (
                     <div key={item._id} className="flex gap-4 group">
-                        <Link href={`/watch/${item.videoid}`} className="flex-shrink-0">
+                        <Link href={`/watch/${item.videoid._id}`} className="flex-shrink-0">
                             <div className="relative w-40 aspect-video bg-gray-100 rounded overflow-hidden">
                                 <video
-                                    src={videos}
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    src={mediaUrl(item.videoid?.filepath)}
+                                    className="object-cover group-hover:scale-105 transition-transform duration-200"
                                 />
                             </div>
                         </Link>
 
                         <div className="flex-1 min-w-0">
-                            <Link href={`/watch/${item.videoid}`}>
+                            <Link href={`/watch/${item.videoid._id}`}>
                                 <h3 className="font-medium text-sm line-clamp-2 group-hover:text-blue-600 mb-1">
-                                    {item.video.videotitle}
+                                    {item.videoid.videotitle}
                                 </h3>
                             </Link>
                             <p className="text-sm text-gray-600">
-                                {item.video.videochanel}
+                                {item.videoid.videochanel}
                             </p>
                             <p className="text-sm text-gray-600">
-                                {item.video.views.toLocaleString()} views •{" "}
-                                {formatDistanceToNow(new Date(item.video.createdAt))} ago
+                                {item.videoid.views.toLocaleString()} views •{" "}
+                                {formatDistanceToNow(new Date(item.videoid.createdAt))} ago
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                                Added {formatDistanceToNow(new Date(item.watchdone))} ago
+                                Added {formatDistanceToNow(new Date(item.createdAt))} ago
                             </p>
                         </div>
 
