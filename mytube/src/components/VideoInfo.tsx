@@ -22,6 +22,12 @@ const VideoInfo = ({ video }: any) => {
     const { user } = useUser();
     const [isWatchLater, setIsWatchLater] = useState(false);
 
+    // const user: any = {
+    //   id: "1",
+    //   name: "John Doe",
+    //   email: "john@example.com",
+    //   image: "https://github.com/shadcn.png?height=32&width=32",
+    // };
     useEffect(() => {
         setlikes(video.Like || 0);
         setDislikes(video.Dislike || 0);
@@ -125,8 +131,11 @@ const VideoInfo = ({ video }: any) => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="rounded-l-full"
+                            className={`rounded-l-full ${!user ? "cursor-not-allowed opacity-50" : ""}`}
                             onClick={handleLike}
+                            disabled={!user}
+                            aria-label={user ? "Like video" : "Sign in to like this video"}
+                            title={!user ? "Sign in to like this video" : undefined}
                         >
                             <ThumbsUp
                                 className={`w-5 h-5 mr-2 ${isLiked ? "fill-black text-black" : ""
@@ -138,8 +147,11 @@ const VideoInfo = ({ video }: any) => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="rounded-r-full"
+                            className={`rounded-r-full ${!user ? "cursor-not-allowed opacity-50" : ""}`}
                             onClick={handleDislike}
+                            disabled={!user}
+                            aria-label={user ? "Dislike video" : "Sign in to react to this video"}
+                            title={!user ? "Sign in to react to this video" : undefined}
                         >
                             <ThumbsDown
                                 className={`w-5 h-5 mr-2 ${isDisliked ? "fill-black text-black" : ""

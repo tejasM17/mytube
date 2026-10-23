@@ -1,8 +1,10 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { MoreVertical, X, Clock, Play } from "lucide-react";
+import { MoreVertical, X, ThumbsUp, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -10,108 +12,65 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUser } from "@/lib/AuthContext";
+import axiosInstance from "@/lib/axiosinstance";
 
-interface LikeItem {
-    _id: string;
-    videoid: string;
-    viewer: string;
-    watchdone: string;
-    video: {
-        _id: string;
-        videotitle: string;
-        videochanel: string;
-        views: number;
-        createdAt: string;
-    };
-
-}
-
-export default function LikedContent() {
-    const [Like, setLike] = useState<LikeItem[]>([]);
+export default function LikedVideosContent() {
+    const [likedVideos, setLikedVideos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    //   const { user } = useUser();
-    const user = {
-        _id: "1",
-        name: "Tejas M",
-        email: "tej@example.com",
-        image: "https://github.com/shadcn.png?height=32&width=32",
-    };
+    const { user } = useUser();
+
     useEffect(() => {
         if (user) {
-            loadHistory();
-        } else {
-            setLoading(true);
+            loadLikedVideos();
         }
-    }, []);
+    }, [user]);
 
-    const loadHistory = async () => {
+    const loadLikedVideos = async () => {
         if (!user) return;
 
         try {
-            const likedData: LikeItem[] = [
-                {
-                    _id: "h1",
-                    videoid: "1",
-                    viewer: user._id,
-                    watchdone: new Date(Date.now() - 3600 * 1000).toISOString(),
-                    video: {
-                        _id: "1",
-                        videotitle: "NewYork City Tour",
-                        videochanel: "Travel Vlogs",
-                        views: 1000,
-                        createdAt: new Date().toISOString(),
-                    }
-                },
-                {
-                    _id: "h2",
-                    videoid: "2",
-                    viewer: user._id,
-                    watchdone: new Date(Date.now() - 3600 * 1000).toISOString(),
-                    video: {
-                        _id: "1",
-                        videotitle: "NewYork City Tour",
-                        videochanel: "Travel Vlogs",
-                        views: 1000,
-                        createdAt: new Date().toISOString(),
-                    },
-                }
-            ];
-            setLike(likedData);
+            const likedData = await axiosInstance.get(`/like/${user?._id}`);
+
+            setLikedVideos(likedData.data);
         } catch (error) {
-            console.error("Error loading history:", error);
+            console.error("Error loading liked videos:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleunlikedvideo = async (likeId: string) => {
-        try {
-            console.log("Removing from history:", likeId);
+    const handleUnlikeVideo = async (videoId: string, likedVideoId: string) => {
+        if (!user) return;
 
-            setLike(Like.filter((item) => item._id !== likeId));
+        try {
+            console.log("Unliking video:", videoId, "for user:", user.id);
+            setLikedVideos(likedVideos.filter((item) => item._id !== likedVideoId));
         } catch (error) {
-            console.error("Error removing from history:", error);
+            console.error("Error unliking video:", error);
         }
     };
 
     if (!user) {
         return (
             <div className="text-center py-12">
-                <Clock className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <ThumbsUp className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                 <h2 className="text-xl font-semibold mb-2">
-                    Keep track of what you watch
+                    Keep track of videos you like
                 </h2>
-                <p className="text-gray-600">
-                    Watch history isn't viewable when signed out.
-                </p>
+                <p className="text-gray-600">Sign in to see your liked videos.</p>
             </div>
         );
     }
 
-    if (Like.length === 0) {
+    if (loading) {
+        return <div>Loading liked videos...</div>;
+    }
+
+    if (likedVideos.length === 0) {
         return (
             <div className="text-center py-12">
-                <Clock className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <ThumbsUp className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                 <h2 className="text-xl font-semibold mb-2">No liked videos yet</h2>
                 <p className="text-gray-600">Videos you like will appear here.</p>
             </div>
@@ -121,40 +80,40 @@ export default function LikedContent() {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-600">{Like.length} videos</p>
-                <Button><Play />Play all</Button>
+                <p className="text-sm text-gray-600">{likedVideos.length} videos</p>
+                <Button className="flex items-center gap-2">
+                    <Play className="w-4 h-4" />
+                    Play all
+                </Button>
             </div>
 
             <div className="space-y-4">
-                {Like.map((item) => (
+                {likedVideos.map((item) => (
                     <div key={item._id} className="flex gap-4 group">
-                        <Link href={`/watch/${item.videoid}`} className="flex-shrink-0">
+                        <Link href={`/watch/${item.videoid._id}`} className="flex-shrink-0">
                             <div className="relative w-40 aspect-video bg-gray-100 rounded overflow-hidden">
                                 <video
-                                    src={videos}
-                                    muted
-                                    playsInline
-                                    preload="metadata"
-                                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    src={`${process.env.BACKEND_URL}/${item.videoid?.filepath}`}
+                                    className="object-cover group-hover:scale-105 transition-transform duration-200"
                                 />
                             </div>
                         </Link>
 
                         <div className="flex-1 min-w-0">
-                            <Link href={`/watch/${item.videoid}`}>
+                            <Link href={`/watch/${item.videoid._id}`}>
                                 <h3 className="font-medium text-sm line-clamp-2 group-hover:text-blue-600 mb-1">
-                                    {item.video.videotitle}
+                                    {item.videoid.videotitle}
                                 </h3>
                             </Link>
                             <p className="text-sm text-gray-600">
-                                {item.video.videochanel}
+                                {item.videoid.videochanel}
                             </p>
                             <p className="text-sm text-gray-600">
-                                {item.video.views.toLocaleString()} views •{" "}
-                                {formatDistanceToNow(new Date(item.video.createdAt))} ago
+                                {item.videoid.views.toLocaleString()} views •{" "}
+                                {formatDistanceToNow(new Date(item.videoid.createdAt))} ago
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                                Added {formatDistanceToNow(new Date(item.watchdone))} ago
+                                Liked {formatDistanceToNow(new Date(item.createdAt))} ago
                             </p>
                         </div>
 
@@ -170,10 +129,10 @@ export default function LikedContent() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem
-                                    onClick={() => handleunlikedvideo(item._id)}
+                                    onClick={() => handleUnlikeVideo(item.videoid._id, item._id)}
                                 >
                                     <X className="w-4 h-4 mr-2" />
-                                    Remove from Liked videos
+                                    Remove from liked videos
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

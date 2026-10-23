@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import userroutes from "./routes/auth.js";
 import videoroutes from "./routes/video.js";
+import likeroutes from "./routes/like.js";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use(bodyParser.json());
 app.use("/user", userroutes);
 app.use("/video", videoroutes);
+app.use("/like", likeroutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
