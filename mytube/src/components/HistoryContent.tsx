@@ -25,7 +25,8 @@ export default function HistoryContent() {
         if (user) {
             loadHistory();
         } else {
-            setLoading(true);
+            setHistory([]);
+            setLoading(false);
         }
     }, [user]);
 
@@ -34,7 +35,7 @@ export default function HistoryContent() {
 
         try {
             const historyData = await axiosInstance.get(`/history/${user?._id}`);
-            setHistory(historyData.data);
+            setHistory(Array.isArray(historyData.data) ? historyData.data.filter((item: any) => item?.videoid) : []);
         } catch (error) {
             console.error("Error loading history:", error);
         } finally {
@@ -87,9 +88,9 @@ export default function HistoryContent() {
 
             <div className="space-y-4">
                 {history.map((item) => (
-                    <div key={item._id} className="flex gap-4 group">
-                        <Link href={`/watch/${item.videoid._id}`} className="flex-shrink-0">
-                            <div className="relative w-40 aspect-video bg-gray-100 rounded overflow-hidden">
+                    <div key={item._id} className="group flex gap-3 sm:gap-4">
+                        <Link href={`/watch/${item.videoid._id}`} className="w-36 shrink-0 sm:w-40">
+                            <div className="relative aspect-video overflow-hidden rounded bg-muted">
                                 <video
                                     src={mediaUrl(item.videoid?.filepath)}
                                     className="object-cover group-hover:scale-105 transition-transform duration-200"
@@ -107,7 +108,7 @@ export default function HistoryContent() {
                                 {item.videoid.videochanel}
                             </p>
                             <p className="text-sm text-gray-600">
-                                {item.videoid.views.toLocaleString()} views •{" "}
+                                {(item.videoid.views || 0).toLocaleString()} views •{" "}
                                 {formatDistanceToNow(new Date(item.videoid.createdAt))} ago
                             </p>
                             <p className="text-xs text-gray-500 mt-1">

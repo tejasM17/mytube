@@ -4,19 +4,28 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { UserProvider } from "../lib/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
+import Link from "next/link";
+import { Home, Compass, PlaySquare } from "lucide-react";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <UserProvider>
-      <div className="min-h-screen bg-white text-black">
-        <title>Your-Tube Clone</title>
-        <Header />
-        <Toaster />
-        <div className="flex">
-          <Sidebar />
-          <Component {...pageProps} />
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <UserProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          <Header />
+          <Toaster />
+          <div className="flex min-w-0">
+            <Sidebar />
+            <div className="min-w-0 flex-1 pb-16 md:pb-0"><Component {...pageProps} /></div>
+          </div>
+          <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t bg-background/95 py-2 backdrop-blur md:hidden" aria-label="Main navigation">
+            <Link href="/" className="flex flex-col items-center gap-1 text-xs"><Home className="h-5 w-5" />Home</Link>
+            <Link href="/explore" className="flex flex-col items-center gap-1 text-xs"><Compass className="h-5 w-5" />Explore</Link>
+            <Link href="/subscriptions" className="flex flex-col items-center gap-1 text-xs"><PlaySquare className="h-5 w-5" />Subscriptions</Link>
+          </nav>
         </div>
-      </div>
-    </UserProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }
