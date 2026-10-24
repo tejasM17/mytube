@@ -13,13 +13,20 @@ import { Button } from "./ui/button";
 import Channeldialogue from "./channeldialogue";
 import { useUser } from "@/lib/AuthContext";
 
-const Sidebar = () => {
+type SidebarProps = {
+    mobileOpen: boolean;
+    onNavigate: () => void;
+};
+
+const Sidebar = ({ mobileOpen, onNavigate }: SidebarProps) => {
     const { user } = useUser();
 
     const [isdialogeopen, setisdialogeopen] = useState(false);
     return (
-        <aside className="hidden min-h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r bg-background p-2 md:block lg:w-64">
-            <nav className="space-y-1">
+        <>
+        {mobileOpen && <button type="button" aria-label="Close menu" className="fixed inset-0 top-14 z-40 bg-black/40 md:hidden" onClick={onNavigate} />}
+        <aside className={`${mobileOpen ? "fixed inset-y-14 left-0 z-50 block w-64 shadow-xl" : "hidden md:block md:min-h-[calc(100vh-3.5rem)] md:w-56 md:shrink-0 md:border-r md:p-2 lg:w-64"} bg-background p-2`}>
+            <nav className="space-y-1" onClick={onNavigate}>
                 <Link href="/">
                     <Button variant="ghost" className="w-full justify-start">
                         <Home className="w-5 h-5 mr-3" />
@@ -89,6 +96,7 @@ const Sidebar = () => {
                 mode="create"
             />
         </aside>
+        </>
     );
 };
 
